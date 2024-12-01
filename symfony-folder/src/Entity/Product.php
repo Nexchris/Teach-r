@@ -22,7 +22,7 @@ class Product
     #[ORM\Column(type: "float")]
     private float $price; 
     
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(name: "creation_date", type: "datetime")] 
     private \DateTime $creationDate; 
 
     #[ORM\ManyToOne(targetEntity: Category::class)]  

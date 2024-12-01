@@ -3,109 +3,141 @@
 namespace App\Controller;
 
 use App\Entity\Product;
-use App\Form\ProductType;
+use App\Entity\Category;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/product')]
-final class ProductController extends AbstractController{
-    #[Route(name: 'app_product_index', methods: ['GET'])]
-    public function index(ProductRepository $productRepository): Response
+#[Route('/api/product')]
+final class ProductController extends AbstractController
+{
+    // Liste tous les produits
+    #[Route('', name: 'api_product_index', methods: ['GET'])]
+    public function index(ProductRepository $productRepository): JsonResponse
     {
-        return $this->render('product/index.html.twig', [
-            'products' => $productRepository->findAll(),
-        ]);
+        $products = $productRepository->findAll();
+
+        $productData = array_map(fn(Product $product) => [
+            'id' => $product->getId(),
+            'name' => $product->getName(),
+            'price' => $product->getPrice(),
+            'description' => $product->getDescription(),
+            'creation_date' => $product->getCreationDate()->format('Y-m-d H:i:s'),
+            'category' => $product->getCategory() ? [
+                'id' => $product->getCategory()->getId(),
+                'name' => $product->getCategory()->getName()
+            ] : null,
+        ], $products);
+
+        return $this->json($productData);
     }
 
-    #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    // Affiche un produit spécifique
+    #[Route('/{id}', name: 'api_product_show', methods: ['GET'])]
+    public function show(Product $product): JsonResponse
     {
+        $productData = [
+            'id' => $product->getId(),
+            'name' => $product->getName(),
+            'price' => $product->getPrice(),
+            'description' => $product->getDescription(),
+            'creation_date' => $product->getCreationDate()->format('Y-m-d H:i:s'),
+            'category' => $product->getCategory() ? [
+                'id' => $product->getCategory()->getId(),
+                'name' => $product->getCategory()->getName()
+            ] : null,
+        ];
+
+        return $this->json($productData);
+    }
+
+    // Crée un nouveau produit
+    #[Route('', name: 'api_product_new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['name'], $data['price'], $data['description'], $data['category'])) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Missing required fields: name, price, description, category.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $category = $entityManager->getRepository(Category::class)->find($data['category']);
+
+        if (!$category) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Category not found.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         $product = new Product();
-        $form = $this->createForm(ProductType::class, $product);
-        $form->handleRequest($request);
+        $product->setName($data['name']);
+        $product->setPrice($data['price']);
+        $product->setDescription($data['description']);
+        $product->setCreationDate(new \DateTime());
+        $product->setCategory($category);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($product);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('product/new.html.twig', [
-            'product' => $product,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_product_show', methods: ['GET'])]
-    public function show(Product $product): Response
-    {
-        return $this->render('product/show.html.twig', [
-            'product' => $product,
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST', 'PUT'])]
-    public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(ProductType::class, $product);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush(); 
-    
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
-        }
-    
-        return $this->render('product/edit.html.twig', [
-            'product' => $product,
-            'form' => $form->createView(),
-        ]);
-    }
-    
-
-    #[Route('/{id}', name: 'app_product_delete', methods: ['POST', 'DELETE'])]
-    public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
-    {
-
-        if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->get('_token'))) {
-
-            $entityManager->remove($product);
-            $entityManager->flush();
-            
-          
-            $this->reindexProducts($entityManager);
-    
-           
-            $connection = $entityManager->getConnection();
-            $connection->executeQuery("DELETE FROM sqlite_sequence WHERE name='product'");
-    
-
-            return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
-        }
-    
-      
-        return $this->redirectToRoute('app_product_index');
-    }
-    
-
-    private function reindexProducts(EntityManagerInterface $entityManager)
-    {
-        
-        $productRepository = $entityManager->getRepository(Product::class);
-        $products = $productRepository->findBy([], ['id' => 'ASC']);
-    
-        $index = 1;
-        foreach ($products as $product) {
-            $product->setId($index);
-            $index++;
-        }
-    
+        $entityManager->persist($product);
         $entityManager->flush();
+
+        return $this->json([
+            'status' => 'success',
+            'id' => $product->getId(),
+        ], Response::HTTP_CREATED);
     }
-    
-    
+
+    // Met à jour un produit
+    #[Route('/{id}', name: 'api_product_edit', methods: ['PUT'])]
+    public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['name'], $data['price'], $data['description'], $data['category'])) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Missing required fields: name, price, description, category.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $category = $entityManager->getRepository(Category::class)->find($data['category']);
+
+        if (!$category) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Category not found.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $product->setName($data['name']);
+        $product->setPrice($data['price']);
+        $product->setDescription($data['description']);
+        $product->setCategory($category);
+
+        $entityManager->flush();
+
+        return $this->json([
+            'status' => 'success',
+            'message' => 'Product updated successfully.',
+        ]);
+    }
+
+    // Supprime un produit
+    #[Route('/{id}', name: 'api_product_delete', methods: ['DELETE'])]
+    public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $entityManager->remove($product);
+        $entityManager->flush();
+
+        return $this->json([
+            'status' => 'success',
+            'message' => 'Product deleted successfully.',
+        ]);
+    }
 }
