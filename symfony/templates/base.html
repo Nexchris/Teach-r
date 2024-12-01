@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créer un Produit</title>
-
-    {% block stylesheets %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -77,10 +75,8 @@
             background-color: #0056b3;
         }
     </style>
-    {% endblock %}
 </head>
 <body>
-    {% block body %}
     <div class="form-container">
         <h1>Créer un Produit</h1>
         <form action="create_product" method="POST">
@@ -117,10 +113,5 @@
             <button type="submit" class="btn-submit">Créer le Produit</button>
         </form>
     </div>
-    {% endblock %}
-
-    {% block javascripts %}
-    <!-- Ajoutez ici vos scripts si nécessaire -->
-    {% endblock %}
 </body>
 </html>
