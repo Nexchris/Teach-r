@@ -13,9 +13,9 @@ function Form() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isProductMode, setIsProductMode] = useState(true);
-  const [editingProduct, setEditingProduct] = useState(null); // État pour le produit en cours d'édition
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // Contrôle de la fenêtre de confirmation de suppression
-  const [productToDelete, setProductToDelete] = useState(null); // Produit sélectionné pour suppression
+  const [editingProduct, setEditingProduct] = useState(null); 
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null); 
 
   useEffect(() => {
     axios.get('http://localhost:8000/api/category')
@@ -39,16 +39,14 @@ function Form() {
     }
   }, [isProductMode]);
 
-  // Fonction pour remplir le formulaire en mode édition
   const handleEdit = (product) => {
     setName(product.name);
     setPrice(product.price);
     setDescription(product.description);
     setCategory(product.category ? product.category.id : '');
-    setEditingProduct(product);  // Définir le produit à éditer
+    setEditingProduct(product);  
   };
 
-  // Fonction pour gérer la soumission du formulaire (création ou édition)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -65,10 +63,9 @@ function Form() {
     try {
       let response;
       if (editingProduct) {
-        // Si un produit est en cours d'édition, effectuer une requête PUT pour la mise à jour
         response = await axios.put(`http://localhost:8000/api/product/${editingProduct.id}`, data);
       } else {
-        // Sinon, créer un nouveau produit ou catégorie
+
         response = await axios.post(
           isProductMode ? 'http://localhost:8000/api/product' : 'http://localhost:8000/api/category', 
           data
@@ -77,12 +74,11 @@ function Form() {
 
       if (response.status === 200 || response.status === 201) {
         setSuccessMessage(isProductMode ? 'Product updated successfully!' : 'Category added successfully!');
-        // Réinitialiser les champs après création/édition
         setName('');
         setPrice('');
         setDescription('');
         setCategory('');
-        setEditingProduct(null);  // Réinitialiser l'état d'édition
+        setEditingProduct(null); 
       }
     } catch (error) {
       setErrorMessage(isProductMode ? 'Failed to update product. Please check your input.' : 'Failed to add category.');
@@ -91,22 +87,20 @@ function Form() {
     }
   };
 
-  // Fonction pour ouvrir le dialogue de suppression
   const handleOpenDeleteDialog = (product) => {
-    setProductToDelete(product);  // Définir le produit à supprimer
-    setOpenDeleteDialog(true);    // Ouvrir la fenêtre de confirmation
+    setProductToDelete(product);  
+    setOpenDeleteDialog(true);    
   };
 
-  // Fonction pour supprimer un produit
   const handleDelete = async () => {
     setLoading(true);
     try {
       const response = await axios.delete(`http://localhost:8000/api/product/${productToDelete.id}`);
       if (response.status === 200) {
         setSuccessMessage('Product deleted successfully!');
-        setProducts(products.filter(product => product.id !== productToDelete.id));  // Supprimer le produit de la liste
-        setOpenDeleteDialog(false);  // Fermer la fenêtre de confirmation
-        setProductToDelete(null);    // Réinitialiser le produit à supprimer
+        setProducts(products.filter(product => product.id !== productToDelete.id)); 
+        setOpenDeleteDialog(false); 
+        setProductToDelete(null);    
       }
     } catch (error) {
       setErrorMessage('Failed to delete product.');
@@ -115,10 +109,9 @@ function Form() {
     }
   };
 
-  // Fonction pour fermer la fenêtre de confirmation sans supprimer
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
-    setProductToDelete(null);  // Réinitialiser le produit à supprimer
+    setProductToDelete(null);  
   };
 
   return (
@@ -226,7 +219,6 @@ function Form() {
         />
       )}
 
-      {/* Product list with Edit button */}
       {isProductMode && products.length > 0 && (
         <TableContainer component={Paper} style={{ marginTop: 30 }}>
           <Table>
@@ -261,7 +253,6 @@ function Form() {
         </TableContainer>
       )}
 
-      {/* Confirmation Dialog for Deleting Product */}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
