@@ -1,68 +1,82 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchProducts } from '../Store/Slices/productSlice';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import axios from 'axios';
 import Button from '@mui/material/Button';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import Background from '../Assets/image/teachr-background.png';
 import Design from '../Assets/image/teachr-design.png';
-import Dashboard from './Dashboard'; 
+import Dashboard from './Dashboard';
 
 export default function CircularIndeterminate() {
-  const [isLoading, setIsLoading] = React.useState(true);  
-  const [products, setProducts] = React.useState([]);  
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); 
+  const { products, loading, error } = useSelector((state) => state.products);
 
-  React.useEffect(() => {
-    axios
-      .get('http://localhost:8000/api/product')
-      .then(response => {
-        setProducts(response.data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error('There was an error fetching products!', error);
-        setIsLoading(false); 
-      });
-  }, []);
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
- 
   const goToFormPage = () => {
-    navigate('/form');
+    navigate('/productform');
   };
 
-  return isLoading ? (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center', 
-        alignItems: 'center',
-        height: '100vh', 
-        backgroundImage: `url(${Background})`, 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center', 
-        backgroundRepeat: 'no-repeat' 
-      }}
-    >
-      <p className="text-center text-lg text-white">Chargement...</p>
-      <CircularProgress />
-    </Box>
-  ) : products.length > 0 ? (
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundImage: `url(${Background})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <p className="text-center text-lg text-white">Chargement...</p>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundImage: `url(${Background})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <p className="text-center text-lg text-white">Erreur : {error}</p>
+      </Box>
+    );
+  }
+
+  return products.length > 0 ? (
     <Dashboard />
   ) : (
     <Box
       sx={{
         display: 'flex',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
         backgroundImage: `url(${Background})`,
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center', 
-        backgroundRepeat: 'no-repeat' 
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
       }}
-      className="flex flex-col space-y-4" 
+      className="flex flex-col space-y-4"
     >
       <Box className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-col justify-center space-y-4 w-1/2 items-center">
@@ -73,11 +87,11 @@ export default function CircularIndeterminate() {
           <Button
             onClick={goToFormPage}
             sx={{
-              background: 'linear-gradient(to right, #005bcb 0%, #1f87ff 100%)', 
-              color: 'white', 
+              background: 'linear-gradient(to right, #005bcb 0%, #1f87ff 100%)',
+              color: 'white',
               '&:hover': {
-                background: 'linear-gradient(to right, #0046a0 0%, #1a6bb0 100%)' 
-              }
+                background: 'linear-gradient(to right, #0046a0 0%, #1a6bb0 100%)',
+              },
             }}
             variant="contained"
           >
@@ -87,7 +101,7 @@ export default function CircularIndeterminate() {
         <img
           src={Design}
           alt="Design"
-          className="max-w-full h-auto w-1/2 mx-auto translate-y-40 translate-x-40" 
+          className="max-w-full h-auto w-1/2 mx-auto translate-y-40 translate-x-40"
         />
       </Box>
     </Box>
