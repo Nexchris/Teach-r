@@ -139,7 +139,7 @@ function ProductForm() {
                 required
               />
             </Grid>
-
+  
             <Grid item xs={12}>
               <TextField
                 label="Price"
@@ -151,7 +151,7 @@ function ProductForm() {
                 required
               />
             </Grid>
-
+  
             <Grid item xs={12}>
               <TextField
                 label="Description"
@@ -164,7 +164,7 @@ function ProductForm() {
                 required
               />
             </Grid>
-
+  
             <Grid item xs={12}>
               <FormControl fullWidth required>
                 <InputLabel>Category</InputLabel>
@@ -181,13 +181,26 @@ function ProductForm() {
                 </Select>
               </FormControl>
             </Grid>
-
+  
             <Grid item xs={12}>
-              <Button variant="contained" color="primary" fullWidth type="submit" disabled={loading}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                fullWidth 
+                type="submit" 
+                disabled={loading}
+                sx={{
+                  backgroundColor: '#219CFF',
+                  borderRadius: '20px',  // Bords arrondis
+                  '&:hover': {
+                    backgroundColor: '#1A86D1', // D'une teinte plus foncée sur hover
+                  },
+                }}
+              >
                 {loading ? <CircularProgress size={24} /> : editingProduct ? 'Update Product' : 'Create Product'}
               </Button>
             </Grid>
-
+  
             {/* Bouton Delete Product si on est en mode édition */}
             {editingProduct && (
               <Grid item xs={12}>
@@ -196,6 +209,13 @@ function ProductForm() {
                   color="secondary"
                   fullWidth
                   onClick={() => setConfirmDelete(true)}
+                  sx={{
+                    backgroundColor: '#FF724F',
+                    borderRadius: '20px',  // Bords arrondis
+                    '&:hover': {
+                      backgroundColor: '#D75C42', // D'une teinte plus foncée sur hover
+                    },
+                  }}
                 >
                   Delete Product
                 </Button>
@@ -204,8 +224,7 @@ function ProductForm() {
           </Grid>
         </form>
       </div>
-
-      {}
+  
       {successMessage && (
         <Snackbar open={true} autoHideDuration={6000} onClose={() => setSuccessMessage('')}>
           <Alert onClose={() => setSuccessMessage('')} severity="success">
@@ -220,8 +239,7 @@ function ProductForm() {
           </Alert>
         </Snackbar>
       )}
-
-      {}
+  
       <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
@@ -238,6 +256,7 @@ function ProductForm() {
       </Dialog>
     </div>
   );
+  
 }
 
 export default ProductForm;
