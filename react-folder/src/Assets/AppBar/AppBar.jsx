@@ -4,11 +4,15 @@ import Logo from '../image/header-logo.png';
 
 function MUIAppBar() {
   return (
-<AppBar position="static" color='white'
-sx={{
-  backgroundColor: 'white',
-  position: 'fixed'
-}}>
+    <AppBar
+      position="static"
+      color="white"
+      sx={{
+        backgroundColor: 'white',
+        position: 'fixed', // Pour que l'AppBar reste fixe
+        zIndex: 1300, // Augmenter le z-index pour donner la priorité
+      }}
+    >
       <Toolbar className="flex justify-center items-center">
         <img
           src={Logo}
@@ -21,5 +25,3 @@ sx={{
 }
 
 export default MUIAppBar;
-
-
