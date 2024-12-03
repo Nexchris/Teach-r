@@ -3,10 +3,14 @@ import Toolbar from '@mui/material/Toolbar';
 import Logo from '../image/header-logo.png';
 
 function MUIAppBar() {
+  const handleReload = () => {
+    window.location.reload();  // Recharge la page
+  };  
   return (
     <AppBar
       position="static"
       color="white"
+      onClick={handleReload}
       sx={{
         backgroundColor: 'white',
         position: 'fixed', // Pour que l'AppBar reste fixe

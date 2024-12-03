@@ -126,13 +126,15 @@ function ProductForm() {
   };
 
   return (
+    <>
+   <div className="absolute inset-0 bg-black opacity-50 z-[-1]"></div>
     <Box
       sx={{
         paddingTop: '5rem'
       }}
     >
-      <div className={`min-h-screen p-8 ${isFadingOut ? 'animate-fade-out' : 'animate-fade-in'}`}>
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 1)' }}>
+      <div className={` p-8 ${isFadingOut ? 'animate-fade-out' : 'animate-fade-in'}`}>
+<div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
           <h1 className="text-2xl font-bold mb-6 text-center">
             {editingProduct ? 'Edit Product' : 'Create Product'}
           </h1>
@@ -283,6 +285,7 @@ function ProductForm() {
         </Dialog>
       </div>
     </Box>
+    </>
   );
 }  
 export default ProductForm;

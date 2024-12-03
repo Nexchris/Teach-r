@@ -34,7 +34,7 @@
 
 body{
   font-family: 'Nunito' !important;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
 }
 @keyframes App-logo-spin {
   from {
