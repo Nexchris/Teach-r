@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert; // Import des contraintes de validation
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
@@ -13,8 +14,13 @@ class Category
     #[ORM\Column]
     private ?int $id = null;
 
+    // Validation de la propriété name
     #[ORM\Column(type: 'string')]
-    private ?string $name;  
+    #[Assert\NotBlank(message: "The category name should not be blank.")] // Validation pour ne pas être vide
+    #[Assert\Length(min: 3, max: 50, 
+        minMessage: "The category name should be at least {{ limit }} characters long.",
+        maxMessage: "The category name should not be longer than {{ limit }} characters.")]
+    private ?string $name;
 
     public function getId(): ?int
     {

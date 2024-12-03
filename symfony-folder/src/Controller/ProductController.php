@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\Product;
@@ -11,11 +10,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/product')]
 final class ProductController extends AbstractController
 {
-    // Liste tous les produits
     #[Route('', name: 'api_product_index', methods: ['GET'])]
     public function index(ProductRepository $productRepository): JsonResponse
     {
@@ -36,11 +35,10 @@ final class ProductController extends AbstractController
         return $this->json($productData);
     }
 
-    // Affiche un produit spécifique
     #[Route('/{id}', name: 'api_product_show', methods: ['GET'])]
     public function show(Product $product): JsonResponse
     {
-        $productData = [
+        $productData = [ 
             'id' => $product->getId(),
             'name' => $product->getName(),
             'price' => $product->getPrice(),
@@ -51,13 +49,11 @@ final class ProductController extends AbstractController
                 'name' => $product->getCategory()->getName()
             ] : null,
         ];
-
         return $this->json($productData);
     }
 
-    // Crée un nouveau produit
     #[Route('', name: 'api_product_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -69,7 +65,6 @@ final class ProductController extends AbstractController
         }
 
         $category = $entityManager->getRepository(Category::class)->find($data['category']);
-
         if (!$category) {
             return $this->json([
                 'status' => 'error',
@@ -84,6 +79,19 @@ final class ProductController extends AbstractController
         $product->setCreationDate(new \DateTime());
         $product->setCategory($category);
 
+        $errors = $validator->validate($product);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json([
+                'status' => 'error',
+                'message' => $errorMessages,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         $entityManager->persist($product);
         $entityManager->flush();
 
@@ -93,9 +101,8 @@ final class ProductController extends AbstractController
         ], Response::HTTP_CREATED);
     }
 
-    // Met à jour un produit
     #[Route('/{id}', name: 'api_product_edit', methods: ['PUT'])]
-    public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): JsonResponse
+    public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -107,7 +114,6 @@ final class ProductController extends AbstractController
         }
 
         $category = $entityManager->getRepository(Category::class)->find($data['category']);
-
         if (!$category) {
             return $this->json([
                 'status' => 'error',
@@ -120,6 +126,19 @@ final class ProductController extends AbstractController
         $product->setDescription($data['description']);
         $product->setCategory($category);
 
+        $errors = $validator->validate($product);
+
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json([
+                'status' => 'error',
+                'message' => $errorMessages,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         $entityManager->flush();
 
         return $this->json([
@@ -128,7 +147,6 @@ final class ProductController extends AbstractController
         ]);
     }
 
-    // Supprime un produit
     #[Route('/{id}', name: 'api_product_delete', methods: ['DELETE'])]
     public function delete(Product $product, EntityManagerInterface $entityManager): JsonResponse
     {
