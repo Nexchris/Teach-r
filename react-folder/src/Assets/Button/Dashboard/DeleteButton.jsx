@@ -20,7 +20,7 @@ const DeleteProductButton = ({ onClick }) => {
         fontWeight: '900',
       }}
     >
-      Supprimer le produit
+      Supprimer
     </Button>
   );
 };

@@ -7,12 +7,20 @@ import Button from '../Assets/Button/ErrorButton';
 const ErrorPage = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
   useEffect(() => {
     setOpenSnackbar(true);
+
+    // Déclencher le fade-out après 5 secondes
+    const fadeOutTimeout = setTimeout(() => {
+      setFadeOut(true);
+    }, 5000); // 5000ms = 5 secondes
+
+    return () => clearTimeout(fadeOutTimeout); // Nettoyer le timeout
   }, []);
 
   const handleReload = () => {
-    window.location.reload(); 
+    window.location.reload();
   };
 
   return (
@@ -38,7 +46,6 @@ const ErrorPage = () => {
           zIndex: 1,
         }}
       />
-
 
       <Box
         sx={{

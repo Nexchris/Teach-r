@@ -24,7 +24,7 @@ const CEProductButton = ({ loading, editingProduct }) => {
       {loading ? (
         <CircularProgress size={24} />
       ) : (
-        editingProduct ? 'Mettre à jour un produit' : 'Mettre à jour un produit'
+        editingProduct ? 'Confirmer' : 'Confirmer'
       )}
     </Button>
   );
