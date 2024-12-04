@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
+import CEButton from '../Assets/Button/CreButton'
 import { useSelector, useDispatch } from 'react-redux'; 
+
 import {
   TextField,
   Button,
@@ -11,7 +13,6 @@ import {
   InputLabel,
   FormControl,
   Grid,
-  CircularProgress,
   Snackbar,
   Alert,
   Dialog,
@@ -20,25 +21,25 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { setCategories, addProduct, updateProduct, deleteProduct } from '../Store/Slices/productSlice'; 
-import Background from '../Assets/image/bg-geometric.jpg';
+import Background from '../background/arraybackground'
 
-function ProductForm() {
+function FormulaireProduit() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
 
-  const categories = useSelector(state => state.products.categories); 
-  const editingProduct = useSelector(state => state.products.products.find(product => product.id === parseInt(productId)));
+  const categories = useSelector(state => state.products.categories);
+  const produitEnEdition = useSelector(state => state.products.products.find(produit => produit.id === parseInt(productId)));
 
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
+  const [nom, setNom] = useState('');
+  const [prix, setPrix] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isFadingOut, setIsFadingOut] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false); 
+  const [categorie, setCategorie] = useState('');
+  const [chargement, setChargement] = useState(false);
+  const [messageSucces, setMessageSucces] = useState('');
+  const [messageErreur, setMessageErreur] = useState('');
+  const [estEnTrainDeDisparaitre, setEstEnTrainDeDisparaitre] = useState(false);
+  const [confirmerSuppression, setConfirmerSuppression] = useState(false);
 
   useEffect(() => {
     if (categories.length === 0) {
@@ -48,260 +49,287 @@ function ProductForm() {
           dispatch(setCategories(response.data));
         })
         .catch((error) => {
-          console.error('Error fetching categories:', error);
+          console.error("Erreur lors de la récupération des catégories :", error);
         });
     }
   }, [categories, dispatch]);
+
   useEffect(() => {
-    if (editingProduct) {
-      setName(editingProduct.name);
-      setPrice(editingProduct.price);
-      setDescription(editingProduct.description);
-      setCategory(editingProduct.category?.id || '');
+    if (produitEnEdition) {
+      setNom(produitEnEdition.name);
+      setPrix(produitEnEdition.price);
+      setDescription(produitEnEdition.description);
+      setCategorie(produitEnEdition.category?.id || '');
     }
-  }, [editingProduct]);
+  }, [produitEnEdition]);
 
-  const handleSubmit = async (e) => {
+  const gererSoumission = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setSuccessMessage('');
-    setErrorMessage('');
+    setChargement(true);
+    setMessageSucces('');
+    setMessageErreur('');
 
-    const data = {
-      name,
-      price,
+    const donnees = {
+      name: nom,
+      price: prix,
       description,
-      category,
+      category: categorie,
     };
 
     try {
-      let response;
-      if (editingProduct) {
-        response = await axios.put(`http://localhost:8000/api/product/${editingProduct.id}`, data);
-        if (response.status === 200) {
-          dispatch(updateProduct(response.data));
+      let reponse;
+      if (produitEnEdition) {
+        reponse = await axios.put(`http://localhost:8000/api/product/${produitEnEdition.id}`, donnees);
+        if (reponse.status === 200) {
+          dispatch(updateProduct(reponse.data));
         }
       } else {
-        response = await axios.post('http://localhost:8000/api/product', data);
-        if (response.status === 201) {
-          dispatch(addProduct(response.data));
+        reponse = await axios.post('http://localhost:8000/api/product', donnees);
+        if (reponse.status === 201) {
+          dispatch(addProduct(reponse.data));
         }
       }
 
-      if (response.status === 200 || response.status === 201) {
-        setSuccessMessage(editingProduct ? 'Product updated successfully!' : 'Product created successfully!');
-        setName('');
-        setPrice('');
+      if (reponse.status === 200 || reponse.status === 201) {
+        setMessageSucces(produitEnEdition ? "Produit mis à jour avec succès !" : "Produit créé avec succès !");
+        setNom('');
+        setPrix('');
         setDescription('');
-        setCategory('');
-        setIsFadingOut(false);
+        setCategorie('');
+        setEstEnTrainDeDisparaitre(false);
 
         setTimeout(() => {
           navigate('/');
         }, 3000);
       }
     } catch (error) {
-      setErrorMessage(editingProduct ? 'Failed to update product.' : 'Failed to create product.');
+      setMessageErreur(produitEnEdition ? "Échec de la mise à jour du produit." : "Échec de la création du produit.");
     } finally {
-      setLoading(false);
+      setChargement(false);
     }
   };
 
-  const handleDelete = async () => {
+  const gererSuppression = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8000/api/product/${editingProduct.id}`);
-      if (response.status === 200) {
-        dispatch(deleteProduct(editingProduct.id));
-        setSuccessMessage('Product deleted successfully!');
-        setIsFadingOut(true);
+      const reponse = await axios.delete(`http://localhost:8000/api/product/${produitEnEdition.id}`);
+      if (reponse.status === 200) {
+        dispatch(deleteProduct(produitEnEdition.id));
+        setMessageSucces("Produit supprimé avec succès !");
+        setEstEnTrainDeDisparaitre(true);
         setTimeout(() => {
           navigate('/');
         }, 3000);
       }
     } catch (error) {
-      setErrorMessage('Failed to delete product.');
+      setMessageErreur("Échec de la suppression du produit.");
     } finally {
-      setConfirmDelete(false);
+      setConfirmerSuppression(false);
     }
   };
 
   return (
     <>
-   <div className="absolute inset-0 bg-black opacity-50 z-[-1]"></div>
-    <Box
-      sx={{
-        paddingTop: '5rem'
-      }}
-    >
-      <div className={` p-8 ${isFadingOut ? 'animate-fade-out' : 'animate-fade-in'}`}>
-<div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            {editingProduct ? 'Edit Product' : 'Create Product'}
-          </h1>
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Name"
-                  variant="outlined"
-                  fullWidth
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </Grid>
-  
-              <Grid item xs={12}>
-                <TextField
-                  label="Price"
-                  variant="outlined"
-                  fullWidth
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
-              </Grid>
-  
-              <Grid item xs={12}>
-                <TextField
-                  label="Description"
-                  variant="outlined"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                />
-              </Grid>
-  
-              <Grid item xs={12}>
-                <FormControl fullWidth required>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    label="Category"
-                  >
-                    {categories.map((cat) => (
-                      <MenuItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0.7,
+          backgroundColor: 'black',
+          zIndex: -2,
+        }}
+      >
+        <Background />
+      </Box>
 
-  
-              <Grid item xs={12}>
-              <Button 
-                  variant="contained" 
-                  color="primary" 
-                  type="submit" 
-                  disabled={loading}
-                 sx={{
-            background: 'linear-gradient(to right, #005bcb 0%, #1f87ff 100%)',
-            color: 'white',
-            transition: 'transform 0.3s ease, background 0.3s ease',
-            '&:hover': {
-              background: 'linear-gradient(to right, #0046a0 0%, #1a6bb0 100%)',
-              transform: 'scale(1.3)',
-            },
-            borderRadius: '20px',
-            fontFamily: 'Nunito, sans-serif',
-            fontWeight: '900',
-          }}
-                >
-                  {loading ? <CircularProgress size={24} /> : editingProduct ? 'Update Product' : 'Create Product'}
-                </Button>
-              </Grid>
-  
-              {/* Bouton Delete Product si on est en mode édition */}
-              {editingProduct && (
+      <div className="absolute inset-0 bg-black opacity-50 z-[-1]"></div>
+
+      <Box>
+        <div className={`min-h-screen p-8 ${estEnTrainDeDisparaitre ? 'animate-fade-out' : 'animate-fade-in'}`}>
+          <div
+            className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto"
+            style={{
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              padding: '2rem',
+              marginTop: '5rem',
+            }}
+          >
+            <h1 className="text-2xl font-bold mb-6 text-center">
+              {produitEnEdition ? "Modifier le produit" : "Créer un produit"}
+            </h1>
+            <form onSubmit={gererSoumission}>
+              <Grid container spacing={3}>
                 <Grid item xs={12}>
+                  <TextField
+                    label="Nom"
+                    disabled={chargement}
+                    variant="outlined"
+                    fullWidth
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
+                    required
+                    sx={{
+                      '& .MuiFormLabel-root': {
+                        fontFamily: '"Nunito", sans-serif',
+                        fontWeight: 'bold',
+                      },
+                      '& .MuiInputBase-input': {
+                        fontFamily: '"Nunito", sans-serif',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    label="Prix"
+                    variant="outlined"
+                    fullWidth
+                    type="number"
+                    value={prix}
+                    onChange={(e) => setPrix(e.target.value)}
+                    required
+                    sx={{
+                      '& .MuiFormLabel-root': {
+                        fontFamily: '"Nunito", sans-serif',
+                        fontWeight: 'bold',
+                      },
+                      '& .MuiInputBase-input': {
+                        fontFamily: '"Nunito", sans-serif',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    label="Description"
+                    variant="outlined"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                    sx={{
+                      '& .MuiFormLabel-root': {
+                        fontFamily: '"Nunito", sans-serif',
+                        fontWeight: 'bold',
+                      },
+                      '& .MuiInputBase-input': {
+                        fontFamily: '"Nunito", sans-serif',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Catégorie</InputLabel>
+                    <Select
+                      value={categorie}
+                      onChange={(e) => setCategorie(e.target.value)}
+                      label="Catégorie"
+                    >
+                      {categories.map((cat) => (
+                        <MenuItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} style={{ textAlign: 'center' }}>
+                  <CEButton />
+                </Grid>
+
+                {produitEnEdition && (
+                  <Grid item xs={12} style={{ textAlign: 'center' }}>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => setConfirmerSuppression(true)}
+                      sx={{
+                        background: 'linear-gradient(to right, #ff724f 0%, #ffb6a3 100%)',
+                        color: 'white',
+                        transition: 'transform 0.3s ease, background 0.3s ease',
+                        '&:hover': {
+                          background: 'linear-gradient(to right, #ff724f 0%, red 100%)',
+                          transform: 'scale(1.3)',
+                        },
+                        borderRadius: '20px',
+                        fontFamily: 'Nunito, sans-serif',
+                        fontWeight: '900',
+                      }}
+                    >
+                      Supprimer le produit
+                    </Button>
+                  </Grid>
+                )}
+
+                <Grid item xs={12} style={{ textAlign: 'center' }}>
                   <Button
                     variant="contained"
                     color="secondary"
-
-                    onClick={() => setConfirmDelete(true)}
+                    onClick={() => navigate('/')}
                     sx={{
-                      background: 'linear-gradient(to right, #ff724f 0%, #ffb6a3 100%)',
+                      backgroundColor: 'black',
                       color: 'white',
                       transition: 'transform 0.3s ease, background 0.3s ease',
                       '&:hover': {
-                        background: 'linear-gradient(to right, #ff724f 0%, red 100%)',
                         transform: 'scale(1.3)',
                       },
                       borderRadius: '20px',
-                      fontFamily: 'Nunito, sans-serif',
+                      fontFamily: '"Nunito", sans-serif',
                       fontWeight: '900',
                     }}
                   >
-                    Delete Product
+                    Retour à l'accueil
                   </Button>
                 </Grid>
-              )}
-  
-              {/* Bouton de retour */}
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-
-                  onClick={() => navigate('/')}
-                  sx={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    transition: 'transform 0.3s ease, background 0.3s ease',
-                    '&:hover': {
-                      transform: 'scale(1.3)',
-                    },
-                    borderRadius: '20px',
-                    fontFamily: 'Nunito, sans-serif',
-                    fontWeight: '900',
-                    
-                  }}
-                >
-                  Back to Home
-                </Button>
               </Grid>
-            </Grid>
-          </form>
+            </form>
+          </div>
+
+          {messageSucces && (
+            <Snackbar open={true} autoHideDuration={6000} onClose={() => setMessageSucces('')}>
+              <Alert onClose={() => setMessageSucces('')} severity="success">
+                {messageSucces}
+              </Alert>
+            </Snackbar>
+          )}
+          {messageErreur && (
+            <Snackbar open={true} autoHideDuration={6000} onClose={() => setMessageErreur('')}>
+              <Alert onClose={() => setMessageErreur('')} severity="error">
+                {messageErreur}
+              </Alert>
+            </Snackbar>
+          )}
+
+          <Dialog open={confirmerSuppression} onClose={() => setConfirmerSuppression(false)}>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogContent>
+              <p>Êtes-vous sûr de vouloir supprimer ce produit ?</p>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmerSuppression(false)} color="primary">
+                Annuler
+              </Button>
+              <Button onClick={gererSuppression} color="secondary">
+                Oui, supprimer
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
-  
-        {successMessage && (
-          <Snackbar open={true} autoHideDuration={6000} onClose={() => setSuccessMessage('')}>
-            <Alert onClose={() => setSuccessMessage('')} severity="success">
-              {successMessage}
-            </Alert>
-          </Snackbar>
-        )}
-        {errorMessage && (
-          <Snackbar open={true} autoHideDuration={6000} onClose={() => setErrorMessage('')}>
-            <Alert onClose={() => setErrorMessage('')} severity="error">
-              {errorMessage}
-            </Alert>
-          </Snackbar>
-        )}
-  
-        <Dialog open={confirmDelete} onClose={() => setConfirmDelete(false)}>
-          <DialogTitle>Confirm Deletion</DialogTitle>
-          <DialogContent>
-            <p>Are you sure you want to delete this product?</p>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setConfirmDelete(false)} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleDelete} color="secondary">
-              Yes, Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
-    </Box>
+      </Box>
     </>
   );
-}  
-export default ProductForm;
+}
+
+export default FormulaireProduit;

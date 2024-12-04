@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProducts } from '../Store/Slices/productSlice';
-import Dashboard from './CurrentDashboard';
+import Dashboard from './Dashboard';
 import LoadingSpinner from '../Assets/Spinner/LoadingSpinner';
 import StartPage from './StartPage';
 import ErrorPage from './ErrorPage';

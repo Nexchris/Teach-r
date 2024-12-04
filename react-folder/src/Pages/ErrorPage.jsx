@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Snackbar } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import Profile from '../Assets/image/teachr-profile.png';
 import Error from '../Assets/image/error-icon.png';
 import 'animate.css';
 import Button from '../Assets/Button/ErrorButton';
@@ -9,7 +7,6 @@ import Button from '../Assets/Button/ErrorButton';
 const ErrorPage = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const navigate = useNavigate();
   useEffect(() => {
     setOpenSnackbar(true);
   }, []);

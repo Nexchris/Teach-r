@@ -4,11 +4,12 @@ import { Box } from '@mui/material';
 function BackgroundComponent() {
   return (
     <>
+    
       <Box
         sx={{
           height: '100vh',
           width: '100vw',
-          zIndex: '-999',
+          zIndex: '-3',
           backgroundImage: `url(${Background})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',

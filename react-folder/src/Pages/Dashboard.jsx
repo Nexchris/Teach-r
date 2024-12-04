@@ -1,216 +1,223 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';  
-import { setProducts, deleteProduct } from '../Store/Slices/productSlice';
-import Background from '../Assets/image/bg-geometric.jpg';
-import axios from 'axios';
-import '../App.css';
-import Dashboard2 from './CurrentDashboard';
+import React, { useEffect, useState } from 'react'; 
+import { useSelector, useDispatch } from 'react-redux'; 
 import { useNavigate } from 'react-router-dom'; 
-import { 
-  Box,
-  Button, 
-  CircularProgress, 
-  Dialog, 
-  DialogActions, 
-  DialogContent, 
-  DialogTitle, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  Select, 
-  MenuItem, 
-  TextField 
-} from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import axios from 'axios'; 
+import { setProducts } from '../Store/Slices/productSlice'; 
+import '../App.css'; 
+import EditButton from '../Assets/Button/Dashboard/EditButton';
+import DeleteButton from '../Assets/Button/Dashboard/DeleteButton'
+import CancelButton from '../Assets/Button/Dashboard/CancelButton';
+import CreateProductButton from '../Assets/Button/Dashboard/ProductButton';
+import ConfirmButton from '../Assets/Button/Dashboard/ConfirmButton';
+import CreateCategoryButton from '../Assets/Button/Dashboard/CategoryButton';
 
-function Dashboard() {
-  const products = useSelector(state => state.products.products);  
+const Dashboard = () => {
+  const products = useSelector((state) => state.products.products);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [isFadingOut, setIsFadingOut] = useState(false); // State for fade-out animation
+  const [currentDashboard, setCurrentDashboard] = useState('products');
   const [productToDelete, setProductToDelete] = useState(null);
-  const [currentDashboard, setCurrentDashboard] = useState("products");
-  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false); // State for create button menu
-  
-  // Pagination and sorting states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(5); // Number of products per page
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name'); // Sorting by name or price
-  
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbar, setSnackbar] = useState(null);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
     axios.get('http://localhost:8000/api/product')
-      .then(response => {
+      .then((response) => {
         dispatch(setProducts(response.data));
       })
-      .catch(error => {
-        console.error('Error fetching products:', error);
-      });
+      .catch((error) => console.error('Error fetching products:', error));
 
     axios.get('http://localhost:8000/api/category')
-      .then(response => {
+      .then((response) => {
         setCategories(response.data);
       })
-      .catch(error => {
-        console.error('Error fetching categories:', error);
-      })
+      .catch((error) => console.error('Error fetching categories:', error))
       .finally(() => setLoading(false));
   }, [dispatch]);
 
-  const handleOpenDeleteDialog = (product) => {
-    setProductToDelete(product);
+  const handleNavigateWithFadeOut = (targetPage) => {
+    navigate(targetPage);
+  };
+
+  // Fonction pour ouvrir la fenêtre modale de suppression pour un produit
+  const handleOpenDeleteDialog = (item, type) => {
+    if (type === 'product') {
+      setProductToDelete(item);
+    } else if (type === 'category') {
+      setCategoryToDelete(item);
+    }
     setOpenDeleteDialog(true);
   };
 
-  const handleDelete = async () => {
-    setLoading(true);
+  // Fonction pour confirmer la suppression avec la vérification des produits
+  const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8000/api/product/${productToDelete.id}`);
-      if (response.status === 200) {
-        dispatch(deleteProduct(productToDelete.id));  // Suppression via Redux
-        setOpenDeleteDialog(false);
-        setProductToDelete(null);
+      if (productToDelete) {
+        await axios.delete(`http://localhost:8000/api/product/${productToDelete.id}`);
+        setSnackbar('Product deleted successfully!');
+        dispatch(setProducts(products.filter(product => product.id !== productToDelete.id)));
+      } else if (categoryToDelete) {
+        // Vérifier si la catégorie contient des produits
+        const productCount = products.filter(
+          (product) => product.category?.id === categoryToDelete.id
+        ).length;
+
+        if (productCount > 0) {
+          setSnackbar('Cannot delete this category because it has associated products.');
+          return;
+        }
+
+        await axios.delete(`http://localhost:8000/api/category/${categoryToDelete.id}`);
+        setSnackbar('Category deleted successfully!');
+        setCategories(categories.filter(category => category.id !== categoryToDelete.id));
       }
     } catch (error) {
-      console.error('Failed to delete product:', error);
+      setSnackbar('Failed to delete. Please try again.');
     } finally {
-      setLoading(false);
+      setOpenDeleteDialog(false);
+      setProductToDelete(null);
+      setCategoryToDelete(null);
     }
   };
 
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
-    setProductToDelete(null);
+  const closeSnackbar = () => {
+    setSnackbar(null);
   };
 
-  const toggleCreateMenu = () => {
-    setIsCreateMenuOpen((prev) => !prev);
-  };
-
-  const handleNavigateWithFadeOut = (targetPage) => {
-    setIsFadingOut(true);
-    setTimeout(() => {
-      navigate(targetPage);
-    }, 2000);  // Delay to match the fade-out duration (2 seconds)
-  };
-
-  // Filtering products based on search term
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Sorting the products
-  const sortedProducts = filteredProducts.sort((a, b) => {
-    if (sortBy === 'name') {
-      return a.name.localeCompare(b.name);
-    } else if (sortBy === 'price') {
-      return a.price - b.price;
-    }
-    return 0;
-  });
-
-  // Pagination logic
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
-
-  return (
-    <div className={`py-20 min-h-screen ${isFadingOut ? 'fade-out' : 'fade-in'}`}>
-      {/* Title Section */}
-      <div className="flex flex-col items-center mb-6 mt-12 phone:text-3xl">
-        <h1 className="text-6xl font-semibold text-gray-950 text-center phone:text-3xl">
-          {currentDashboard === 'products' ? 'Product Dashboard' : 'Category Dashboard'}
-        </h1>
-  
-        {/* Search and Sorting Section */}
-        <div className="flex space-x-4 mt-4">
-          <TextField
-            label="Search Products"
-            variant="outlined"
-            size="small"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-1/4"
-          />
-          <Select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="bg-white border border-gray-300 p-1 rounded text-sm"
-            size="small"
-          >
-            <MenuItem value="name">Sort by Name</MenuItem>
-            <MenuItem value="price">Sort by Price</MenuItem>
-          </Select>
-        </div>
-  
-        {/* Flex container for Select and Create button */}
-        <div className="flex space-x-4 mt-4">
-          <select
-            value={currentDashboard}
-            onChange={(e) => setCurrentDashboard(e.target.value)}
-            className="bg-white border border-gray-300 p-1 rounded text-sm"
-          >
-            <option value="products">Product Dashboard</option>
-            <option value="categories">Category Dashboard</option>
-          </select>
-  
-          <div className="relative">
-            <button
-              onClick={toggleCreateMenu}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm"
-            >
-              Create {isCreateMenuOpen ? '▲' : '▼'}
-            </button>
-            {isCreateMenuOpen && (
-              <div
-                className="absolute top-full mt-1 left-0 bg-white shadow-md rounded w-full origin-top"
-                style={{
-                  transform: `scale(${isCreateMenuOpen ? 1 : 0})`,
-                  opacity: isCreateMenuOpen ? 1 : 0,
-                  transition: 'transform 0.3s ease, opacity 0.3s ease',
-                }}
-              >
-                <button
-                  onClick={() => handleNavigateWithFadeOut('/productform')}
-                  className="py-1 px-3 hover:bg-gray-100 text-gray-800 w-full text-left text-sm"
-                >
-                  Product
-                </button>
-                <button
-                  onClick={() => handleNavigateWithFadeOut('/categoryform')}
-                  className="py-1 px-3 hover:bg-gray-100 text-gray-800 w-full text-left text-sm"
-                >
-                  Category
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+  // Table pour les produits sans pagination
+  const ProductTable = () => {
+    return (
+      <div className="overflow-x-auto shadow-md rounded-lg mx-auto max-w-6xl mt-6">
+        <table className="w-full table-auto border-collapse border border-gray-300">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="px-4 py-2 text-left font-semibold">Nom</th>
+              <th className="px-4 py-2 text-left font-semibold">Prix</th>
+              <th className="px-4 py-2 text-left font-semibold">Description</th>
+              <th className="px-4 py-2 text-left font-semibold">Catégorie</th>
+              <th className="px-4 py-2 text-left font-semibold">Date de création</th>
+              <th className="px-4 py-2 text-left font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={product.id} className="border-b border-gray-300 hover:bg-gray-100">
+                <td className="px-4 py-2">{product.name}</td>
+                <td className="px-4 py-2">{product.price}</td>
+                <td className="px-4 py-2 break-word">{product.description}</td>
+                <td className="px-4 py-2">{product.category?.name || 'N/A'}</td>
+                <td className="px-4 py-2">
+                  {new Date(product.creation_date).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-2">
+                  <div className="flex space-x-2">
+                    <EditButton onClick={() => handleNavigateWithFadeOut(`/productform/${product.id}`)} />
+                    <DeleteButton onClick={() => handleOpenDeleteDialog(product, 'product')} />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    );
+  };
   
-      {/* Content Section */}
+  const CategoryTable = () => {
+    return (
+      <div className="overflow-x-auto shadow-md rounded-lg mx-auto max-w-6xl mt-6">
+        <table className="w-full table-auto border-collapse border border-gray-300">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="px-4 py-2 text-left font-semibold">Nom de la catégorie</th>
+              <th className="px-4 py-2 text-left font-semibold">Nombre de produits</th>
+              <th className="px-4 py-2 text-left font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map((category) => {
+              const productCount = products.filter(
+                (product) => product.category?.id === category.id
+              ).length;
+  
+              return (
+                <tr key={category.id} className="border-b border-gray-300 hover:bg-gray-100">
+                  <td className="px-4 py-2">{category.name}</td>
+                  <td className="px-4 py-2">{productCount}</td>
+                  <td className="px-4 py-2">
+                    <div className="flex space-x-2">
+                      <EditButton onClick={() => handleNavigateWithFadeOut(`/categoryform/${category.id}`)} />
+                      <DeleteButton onClick={() => handleOpenDeleteDialog(category, 'category')} />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+  
+  return (
+    <div className="py-20 min-h-screen">
+      <div className="text-center mb-6">
+        <h1 className="text-4xl font-semibold">
+          {currentDashboard === 'products' ? 'Tableau de bord des produits' : 'Tableau de bord des catégories'}
+        </h1>
+        <div className="flex justify-center space-x-4 mt-6">
+          <CreateProductButton onClick={() => handleNavigateWithFadeOut('/productform')} />
+          <CreateCategoryButton onClick={() => handleNavigateWithFadeOut('/categoryform')} />
+        </div>
+        <select
+          value={currentDashboard}
+          onChange={(e) => setCurrentDashboard(e.target.value)}
+          className="mt-4 bg-white border border-gray-300 p-2 rounded"
+        >
+          <option value="products">Tableau de bord des produits</option>
+          <option value="categories">Tableau de bord des catégories</option>
+        </select>
+      </div>
       {loading ? (
-        <div className="flex justify-center items-center h-full">
-          <CircularProgress />
+        <div className="text-center">
+          <div className="loader">Chargement...</div>
         </div>
       ) : (
         <>
-          <Dashboard2 />
+          {currentDashboard === 'products' ? <ProductTable /> : <CategoryTable />}
         </>
+      )}
+  
+      {openDeleteDialog && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Êtes-vous sûr de vouloir supprimer ce {productToDelete ? 'produit' : 'catégorie'} ?</h2>
+            <div className="flex space-x-4">
+              <ConfirmButton onClick={confirmDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
+                Confirmer
+              </ConfirmButton>
+              <CancelButton onClick={() => setOpenDeleteDialog(false)} >
+                Annuler
+              </CancelButton>
+            </div>
+          </div>
+        </div>
+      )}
+  
+      {snackbar && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-md">
+          {snackbar}
+          <button onClick={closeSnackbar} className="ml-4 text-white font-bold">X</button>
+        </div>
       )}
     </div>
   );
-}
+  };
+  
 
 export default Dashboard;

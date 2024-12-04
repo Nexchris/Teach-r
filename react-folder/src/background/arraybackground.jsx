@@ -4,6 +4,8 @@ import { Box } from '@mui/material';  // Importation de Box de Material UI
 
 const BackgroundImages = () => {
   return (
+    <>
+
     <Box
       sx={{
         display: 'flex',
@@ -29,6 +31,8 @@ const BackgroundImages = () => {
         />
       ))}
     </Box>
+    
+    </>
   );
 };
 
