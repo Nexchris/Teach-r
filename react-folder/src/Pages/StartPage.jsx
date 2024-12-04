@@ -12,7 +12,7 @@ const StartPage = () => {
     setFadeOut(true);
     setTimeout(() => {
       navigate('/productform');
-    }, 500);
+    }, 500); // Attente de l'animation fade-out avant de changer de page
   };
 
   return (

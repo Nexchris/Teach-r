@@ -192,21 +192,26 @@ function ProductForm() {
                   </Select>
                 </FormControl>
               </Grid>
+
   
               <Grid item xs={12}>
-                <Button 
+              <Button 
                   variant="contained" 
                   color="primary" 
-                  fullWidth 
                   type="submit" 
                   disabled={loading}
-                  sx={{
-                    backgroundColor: '#219CFF',
-                    borderRadius: '20px',  // Bords arrondis
-                    '&:hover': {
-                      backgroundColor: '#1A86D1', // D'une teinte plus foncée sur hover
-                    },
-                  }}
+                 sx={{
+            background: 'linear-gradient(to right, #005bcb 0%, #1f87ff 100%)',
+            color: 'white',
+            transition: 'transform 0.3s ease, background 0.3s ease',
+            '&:hover': {
+              background: 'linear-gradient(to right, #0046a0 0%, #1a6bb0 100%)',
+              transform: 'scale(1.3)',
+            },
+            borderRadius: '20px',
+            fontFamily: 'Nunito, sans-serif',
+            fontWeight: '900',
+          }}
                 >
                   {loading ? <CircularProgress size={24} /> : editingProduct ? 'Update Product' : 'Create Product'}
                 </Button>
@@ -218,14 +223,19 @@ function ProductForm() {
                   <Button
                     variant="contained"
                     color="secondary"
-                    fullWidth
+
                     onClick={() => setConfirmDelete(true)}
                     sx={{
-                      backgroundColor: '#FF724F',
-                      borderRadius: '20px',  // Bords arrondis
+                      background: 'linear-gradient(to right, #ff724f 0%, #ffb6a3 100%)',
+                      color: 'white',
+                      transition: 'transform 0.3s ease, background 0.3s ease',
                       '&:hover': {
-                        backgroundColor: '#D75C42', // D'une teinte plus foncée sur hover
+                        background: 'linear-gradient(to right, #ff724f 0%, red 100%)',
+                        transform: 'scale(1.3)',
                       },
+                      borderRadius: '20px',
+                      fontFamily: 'Nunito, sans-serif',
+                      fontWeight: '900',
                     }}
                   >
                     Delete Product
@@ -236,15 +246,21 @@ function ProductForm() {
               {/* Bouton de retour */}
               <Grid item xs={12}>
                 <Button
-                  variant="outlined"
-                  color="default"
-                  fullWidth
-                  onClick={() => navigate('/')} // Retour à la route "/"
+                  variant="contained"
+                  color="secondary"
+
+                  onClick={() => navigate('/')}
                   sx={{
-                    borderRadius: '20px',  // Bords arrondis
+                    backgroundColor: 'black',
+                    color: 'white',
+                    transition: 'transform 0.3s ease, background 0.3s ease',
                     '&:hover': {
-                      backgroundColor: '#e0e0e0', // Teinte plus claire au survol
+                      transform: 'scale(1.3)',
                     },
+                    borderRadius: '20px',
+                    fontFamily: 'Nunito, sans-serif',
+                    fontWeight: '900',
+                    
                   }}
                 >
                   Back to Home

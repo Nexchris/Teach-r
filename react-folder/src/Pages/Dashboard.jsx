@@ -97,164 +97,135 @@ function Dashboard() {
   };
 
   return (
-    <Box
-    >
-      <div className={`py-20 min-h-screen ${isFadingOut ? 'fade-out' : 'fade-in'}`}>
-
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex-1">
-            <h1 className="text-2xl font-semibold text-gray-800">
-              {currentDashboard === 'products' ? 'Product Dashboard' : 'Category Dashboard'}
-            </h1>
-          </div>
+    <div className={`py-20 min-h-screen ${isFadingOut ? 'fade-out' : 'fade-in'}`}>
+      {/* Title Section */}
+      <div className="flex flex-col items-center mb-6 mt-12   phone:text-3xl">
+        <h1 className="text-6xl font-semibold text-gray-950 text-center  phone:text-3xl">
+          {currentDashboard === 'products' ? 'Product Dashboard' : 'Category Dashboard'}
+        </h1>
   
-          <div className="flex space-x-4">
-            <Select
-              value={currentDashboard}
-              onChange={(e) => setCurrentDashboard(e.target.value)}
-              className="bg-white"
+        {/* Flex container for Select and Create button */}
+        <div className="flex space-x-4 mt-4">
+          <select
+            value={currentDashboard}
+            onChange={(e) => setCurrentDashboard(e.target.value)}
+            className="bg-white border border-gray-300 p-1 rounded text-sm"
+          >
+            <option value="products">Product Dashboard</option>
+            <option value="categories">Category Dashboard</option>
+          </select>
+  
+          <div className="relative">
+            <button
+              onClick={toggleCreateMenu}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm"
             >
-              <MenuItem value="products">Product Dashboard</MenuItem>
-              <MenuItem value="categories">Category Dashboard</MenuItem>
-            </Select>
-  
-            <div className="relative">
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={toggleCreateMenu}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+              Create {isCreateMenuOpen ? '▲' : '▼'}
+            </button>
+            {isCreateMenuOpen && (
+              <div
+                className="absolute top-full mt-1 left-0 bg-white shadow-md rounded w-full origin-top"
+                style={{
+                  transform: `scale(${isCreateMenuOpen ? 1 : 0})`,
+                  opacity: isCreateMenuOpen ? 1 : 0,
+                  transition: 'transform 0.3s ease, opacity 0.3s ease',
+                }}
               >
-                Create {isCreateMenuOpen ? '▲' : '▼'}
-              </Button>
-              {isCreateMenuOpen && (
-                <div
-                  className="absolute top-full mt-2 left-0 bg-white shadow-md rounded w-full origin-top"
-                  style={{
-                    transform: `scale(${isCreateMenuOpen ? 1 : 0})`,
-                    opacity: isCreateMenuOpen ? 1 : 0,
-                    transition: 'transform 0.3s ease, opacity 0.3s ease',
-                  }}
+                <button
+                  onClick={() => handleNavigateWithFadeOut('/productform')}
+                  className="py-1 px-3 hover:bg-gray-100 text-gray-800 w-full text-left text-sm"
                 >
-                  <Button
-                    fullWidth
-                    onClick={() => handleNavigateWithFadeOut('/productform')}
-                    className="py-2 hover:bg-gray-100 text-gray-800"
-                  >
-                    Product
-                  </Button>
-                  <Button
-                    fullWidth
-                    onClick={() => handleNavigateWithFadeOut('/categoryform')}
-                    className="py-2 hover:bg-gray-100 text-gray-800"
-                  >
-                    Category
-                  </Button>
-                </div>
-              )}
-            </div>
+                  Product
+                </button>
+                <button
+                  onClick={() => handleNavigateWithFadeOut('/categoryform')}
+                  className="py-1 px-3 hover:bg-gray-100 text-gray-800 w-full text-left text-sm"
+                >
+                  Category
+                </button>
+              </div>
+            )}
           </div>
         </div>
-  
-        {/* Content Section */}
-        {loading ? (
-          <div className="flex justify-center items-center h-full">
-            <CircularProgress />
-          </div>
-        ) : (
-          <>
-            {currentDashboard === 'products' ? (
-              <TableContainer component={Paper} className="shadow-lg rounded-lg overflow-x-auto">
-                <Table>
-                  <TableHead className="bg-blue-600 text-white">
-                    <TableRow>
-                      <TableCell className="font-semibold">Name</TableCell>
-                      <TableCell className="font-semibold">Price</TableCell>
-                      <TableCell className="font-semibold">Description</TableCell>
-                      <TableCell className="font-semibold">Category</TableCell>
-                      <TableCell className="font-semibold">Creation Date</TableCell>
-                      <TableCell className="font-semibold">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {products.map((product) => (
-                      <TableRow key={product.id} className="hover:bg-gray-100 transition-colors">
-                        <TableCell>{product.name}</TableCell>
-                        <TableCell>{product.price}</TableCell>
-                        <TableCell>{product.description}</TableCell>
-                        <TableCell>{product.category?.name || 'N/A'}</TableCell>
-                        <TableCell>{new Date(product.creation_date).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<Edit />}
-                              onClick={() => handleNavigateWithFadeOut(`/productform/${product.id}`)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<Delete />}
-                              onClick={() => handleOpenDeleteDialog(product)}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <TableContainer component={Paper} className="shadow-lg rounded-lg overflow-x-auto">
-                <Table>
-                  <TableHead className="bg-blue-600 text-white">
-                    <TableRow>
-                      <TableCell className="font-semibold">Name</TableCell>
-                      <TableCell className="font-semibold">Number of Products</TableCell>
-                      <TableCell className="font-semibold">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {categories.map((category) => (
-                      <TableRow key={category.id} className="hover:bg-gray-100 transition-colors">
-                        <TableCell>{category.name}</TableCell>
-                        <TableCell>{category.products?.length || 0}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<Edit />}
-                              onClick={() => handleNavigateWithFadeOut(`/categoryform/${category.id}`)}
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<Delete />}
-                              onClick={() => handleOpenDeleteDialog(category)}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </>
-        )}
       </div>
-    </Box>
-  );  
+  
+      {/* Content Section */}
+      {loading ? (
+        <div className="flex justify-center items-center h-full">
+          <div className="spinner-border animate-spin inline-block w-6 h-6 border-4 border-t-4 border-blue-600 rounded-full"></div>
+        </div>
+      ) : (
+        <>
+          {/* Table Section */}
+          <div className="overflow-x-auto shadow-lg rounded-lg mx-auto max-w-6xl mt-6">
+            <table className="min-w-full table-auto table-fixed">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/4">Name</th>
+                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/6">Price</th>
+                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/4">Description</th>
+                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/5">Category</th>
+                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/6">Creation Date</th>
+                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/6">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentDashboard === 'products' && products.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-100 transition-colors">
+                    <td className="py-1 px-2 text-sm">{product.name}</td>
+                    <td className="py-1 px-2 text-sm">{product.price}</td>
+                    <td className="py-1 px-2 text-sm">{product.description}</td>
+                    <td className="py-1 px-2 text-sm">{product.category?.name || 'N/A'}</td>
+                    <td className="py-1 px-2 text-sm">{new Date(product.creation_date).toLocaleDateString()}</td>
+                    <td className="py-1 px-2">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleNavigateWithFadeOut(`/productform/${product.id}`)}
+                          className="py-1 px-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleOpenDeleteDialog(product)}
+                          className="py-1 px-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {currentDashboard === 'categories' && categories.map((category) => (
+                  <tr key={category.id} className="hover:bg-gray-100 transition-colors">
+                    <td className="py-1 px-2 text-sm">{category.name}</td>
+                    <td className="py-1 px-2 text-sm">{category.products?.length || 0}</td>
+                    <td className="py-1 px-2">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleNavigateWithFadeOut(`/categoryform/${category.id}`)}
+                          className="py-1 px-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleOpenDeleteDialog(category)}
+                          className="py-1 px-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+  
+
 }  
 
 export default Dashboard;
