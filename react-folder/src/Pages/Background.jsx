@@ -1,26 +1,25 @@
 import Background from '../Assets/image/bg-geometric.jpg';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 function BackgroundComponent() {
   return (
     <>
       <Box
         sx={{
-          height: '100vh', // Hauteur de l'écran
-          width: '100vw',  // Largeur de l'écran
+          height: '100vh',
+          width: '100vw',
           zIndex: '-999',
-          backgroundImage: `url(${Background})`, // Définir l'image de fond
-          backgroundSize: 'cover', // Couvrir toute la zone
-          backgroundPosition: 'center', // Centrer l'image
+          backgroundImage: `url(${Background})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          position: 'absolute', // Pour pouvoir placer d'autres éléments par-dessus
+          position: 'absolute',
         }}
       > 
       </Box>
 
-      {/* Wrapper des vagues */}
       <div className="waveWrapper waveAnimation">
         <div className="waveWrapperInner bgTop">
           <div

@@ -45,10 +45,9 @@ body{
   }
 }
 
-/* styles.css */
 .fade-in {
   opacity: 0;
-  animation: fadeIn 0.5s forwards;
+  animation: fadeIn 2s forwards;
 }
 
 .fade-out {
@@ -145,4 +144,9 @@ animation: move-wave 3s;
 }
 .waveAnimation .waveBottom {
   animation: move_wave 15s linear infinite;
+}
+
+.break-word {
+  word-wrap: break-word;
+  word-break: break-word;
 }

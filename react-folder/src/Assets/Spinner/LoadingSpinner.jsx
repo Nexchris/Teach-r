@@ -5,9 +5,9 @@ import 'animate.css';
 const LoadingSpinner = () => {
   const [fadeIn, setFadeIn] = useState(false);
 
-  // Simule un délai de chargement
+ 
   useEffect(() => {
-    setFadeIn(true); // Fait apparaître le texte dès que le composant est monté
+    setFadeIn(true); 
   }, []);
 
   return (
@@ -21,10 +21,7 @@ const LoadingSpinner = () => {
         position: 'relative',
       }}
     >
-      {/* Spinner */}
       <CircularProgress sx={{ marginBottom: 2, color: 'white' }} size={200} />
-
-      {/* Texte de chargement avec animation fade-in */}
       <Typography
         variant="h4"
         component="p"

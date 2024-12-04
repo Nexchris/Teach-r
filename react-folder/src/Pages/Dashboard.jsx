@@ -4,7 +4,7 @@ import { setProducts, deleteProduct } from '../Store/Slices/productSlice';
 import Background from '../Assets/image/bg-geometric.jpg';
 import axios from 'axios';
 import '../App.css';
-
+import Dashboard2 from './CurrentDashboard';
 import { useNavigate } from 'react-router-dom'; 
 import { 
   Box,
@@ -22,11 +22,10 @@ import {
   TableRow, 
   Paper, 
   Select, 
-  MenuItem 
+  MenuItem, 
+  TextField 
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 function Dashboard() {
   const products = useSelector(state => state.products.products);  
@@ -37,6 +36,13 @@ function Dashboard() {
   const [productToDelete, setProductToDelete] = useState(null);
   const [currentDashboard, setCurrentDashboard] = useState("products");
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false); // State for create button menu
+  
+  // Pagination and sorting states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(5); // Number of products per page
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name'); // Sorting by name or price
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -89,20 +95,64 @@ function Dashboard() {
   const toggleCreateMenu = () => {
     setIsCreateMenuOpen((prev) => !prev);
   };
+
   const handleNavigateWithFadeOut = (targetPage) => {
     setIsFadingOut(true);
     setTimeout(() => {
       navigate(targetPage);
-    }, 500);  // Delay to match the fade-out duration
+    }, 2000);  // Delay to match the fade-out duration (2 seconds)
   };
+
+  // Filtering products based on search term
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Sorting the products
+  const sortedProducts = filteredProducts.sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name);
+    } else if (sortBy === 'price') {
+      return a.price - b.price;
+    }
+    return 0;
+  });
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
 
   return (
     <div className={`py-20 min-h-screen ${isFadingOut ? 'fade-out' : 'fade-in'}`}>
       {/* Title Section */}
-      <div className="flex flex-col items-center mb-6 mt-12   phone:text-3xl">
-        <h1 className="text-6xl font-semibold text-gray-950 text-center  phone:text-3xl">
+      <div className="flex flex-col items-center mb-6 mt-12 phone:text-3xl">
+        <h1 className="text-6xl font-semibold text-gray-950 text-center phone:text-3xl">
           {currentDashboard === 'products' ? 'Product Dashboard' : 'Category Dashboard'}
         </h1>
+  
+        {/* Search and Sorting Section */}
+        <div className="flex space-x-4 mt-4">
+          <TextField
+            label="Search Products"
+            variant="outlined"
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-1/4"
+          />
+          <Select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-white border border-gray-300 p-1 rounded text-sm"
+            size="small"
+          >
+            <MenuItem value="name">Sort by Name</MenuItem>
+            <MenuItem value="price">Sort by Price</MenuItem>
+          </Select>
+        </div>
   
         {/* Flex container for Select and Create button */}
         <div className="flex space-x-4 mt-4">
@@ -152,80 +202,15 @@ function Dashboard() {
       {/* Content Section */}
       {loading ? (
         <div className="flex justify-center items-center h-full">
-          <div className="spinner-border animate-spin inline-block w-6 h-6 border-4 border-t-4 border-blue-600 rounded-full"></div>
+          <CircularProgress />
         </div>
       ) : (
         <>
-          {/* Table Section */}
-          <div className="overflow-x-auto shadow-lg rounded-lg mx-auto max-w-6xl mt-6">
-            <table className="min-w-full table-auto table-fixed">
-              <thead className="bg-blue-600 text-white">
-                <tr>
-                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/4">Name</th>
-                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/6">Price</th>
-                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/4">Description</th>
-                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/5">Category</th>
-                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/6">Creation Date</th>
-                  <th className="py-1 px-2 text-left font-semibold text-sm w-1/6">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentDashboard === 'products' && products.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-100 transition-colors">
-                    <td className="py-1 px-2 text-sm">{product.name}</td>
-                    <td className="py-1 px-2 text-sm">{product.price}</td>
-                    <td className="py-1 px-2 text-sm">{product.description}</td>
-                    <td className="py-1 px-2 text-sm">{product.category?.name || 'N/A'}</td>
-                    <td className="py-1 px-2 text-sm">{new Date(product.creation_date).toLocaleDateString()}</td>
-                    <td className="py-1 px-2">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleNavigateWithFadeOut(`/productform/${product.id}`)}
-                          className="py-1 px-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleOpenDeleteDialog(product)}
-                          className="py-1 px-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {currentDashboard === 'categories' && categories.map((category) => (
-                  <tr key={category.id} className="hover:bg-gray-100 transition-colors">
-                    <td className="py-1 px-2 text-sm">{category.name}</td>
-                    <td className="py-1 px-2 text-sm">{category.products?.length || 0}</td>
-                    <td className="py-1 px-2">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleNavigateWithFadeOut(`/categoryform/${category.id}`)}
-                          className="py-1 px-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleOpenDeleteDialog(category)}
-                          className="py-1 px-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Dashboard2 />
         </>
       )}
     </div>
   );
-  
-
-}  
+}
 
 export default Dashboard;

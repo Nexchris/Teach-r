@@ -14,6 +14,7 @@ import store from './Store/store.js';
 import Footer from './Assets/Footer/footer.jsx';
 import Background from './pages/Background.jsx';
 import ErrorPage from './pages/ErrorPage.jsx';
+import CurrentDashboard from '../src/pages/Dashboard.jsx'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/p" element={<StartPage />} />
+          <Route path="/dash" element={<CurrentDashboard />} />
           <Route path="/a" element={<Array />} />
           <Route path="/loading" element={<LoadingPage />} />
           <Route path="/b" element={<Background />} />

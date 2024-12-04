@@ -4,7 +4,7 @@ import Logo from '../image/header-logo.png';
 
 function MUIAppBar() {
   const handleReload = () => {
-    window.location.reload();  // Recharge la page
+    window.location.reload();
   };  
   return (
     <AppBar
@@ -13,15 +13,15 @@ function MUIAppBar() {
       onClick={handleReload}
       sx={{
         backgroundColor: 'white',
-        position: 'fixed', // Pour que l'AppBar reste fixe
-        zIndex: 1300, // Augmenter le z-index pour donner la priorité
+        position: 'fixed',
+        zIndex: 1300,
       }}
     >
       <Toolbar className="flex justify-center items-center">
         <img
           src={Logo}
           alt="Logo"
-          className="cursor-pointer max-h-12" // max-h-12 pour ajuster la taille du logo
+          className="cursor-pointer max-h-12" 
         />
       </Toolbar>
     </AppBar>

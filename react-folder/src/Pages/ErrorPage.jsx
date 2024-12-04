@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Snackbar } from '@mui/material';
+import { Box, Snackbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Profile from '../Assets/image/teachr-profile.png';
 import Error from '../Assets/image/error-icon.png';
 import 'animate.css';
+import Button from '../Assets/Button/ErrorButton';
 
 const ErrorPage = () => {
   const [fadeOut, setFadeOut] = useState(false);
@@ -65,24 +66,7 @@ const ErrorPage = () => {
           <p style={{ marginTop: '0.5rem' }} className="text-2xl font-black text-white">
             Vérifiez que le serveur et la base de données sont activés.
           </p>
-          <Button
-            onClick={handleReload}
-            sx={{
-              background: 'linear-gradient(to right, #ff724f 0%, #ffb6a3 100%)',
-              color: 'white',
-              transition: 'transform 0.3s ease, background 0.3s ease',
-              '&:hover': {
-                background: 'linear-gradient(to right, #ff724f 0%, red 100%)',
-                transform: 'scale(1.3)',
-              },
-              borderRadius: '20px',
-              fontFamily: 'Nunito, sans-serif',
-              fontWeight: '900',
-            }}
-            variant="contained"
-          >
-            Recharger
-          </Button>
+          <Button onClick={handleReload} > </Button>
         </Box>
       </Box>
 

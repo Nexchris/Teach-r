@@ -1,57 +1,44 @@
 import React from 'react';
-import { Box, Button, Link, Typography } from '@mui/material';
-import { Facebook, Twitter, Instagram } from '@mui/icons-material'; 
+import { Link } from 'react-router-dom';
+import { Facebook, Instagram, LinkedIn } from '@mui/icons-material';
+import Logo from '../image/header-logo.png';
 
 const Footer = () => {
   return (
-    <Box
-      sx={{
-        backgroundColor: '#333',
-        color: 'white',
-        py: 4,
-        mt: 6,
-      }}
-    >
-      <div className="container mx-auto px-4 text-center">
-        <div className="flex justify-center space-x-6 mb-6">
-          <Link href="https://facebook.com" target="_blank" className="text-white hover:text-blue-500">
-            <Facebook />
-          </Link>
-          <Link href="https://twitter.com" target="_blank" className="text-white hover:text-blue-400">
-            <Twitter />
-          </Link>
-          <Link href="https://instagram.com" target="_blank" className="text-white hover:text-pink-500">
-            <Instagram />
-          </Link>
-        </div>
-        <Typography variant="body2" component="p" sx={{ mb: 1 }}>
-          <span>© 2024 VotreNom. Tous droits réservés.</span>
-        </Typography>
+    <footer className="bg-[#004066] text-white py-8">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex flex-col items-center sm:items-start">
+            <img src={Logo} alt="Logo Teach'r" className="h-20 mb-4" />
+            <p className="text-sm text-center sm:text-left">Tous vos cours particuliers dans une seule application</p>
+          </div>
 
-        <div className="flex justify-center space-x-6 mb-4">
-          <Link href="/about" className="text-white hover:text-gray-400">
-            À propos
-          </Link>
-          <Link href="/contact" className="text-white hover:text-gray-400">
-            Contact
-          </Link>
-          <Link href="/privacy" className="text-white hover:text-gray-400">
-            Politique de confidentialité
-          </Link>
+          <div className="flex flex-col items-center sm:items-start space-y-3">
+            <Link to="https://teachr.fr/who-are-we" className="text-sm hover:underline">Qui sommes-nous ?</Link>
+            <Link to="https://teachr.fr/faq" className="text-sm hover:underline">FAQ</Link>
+            <Link to="https://teachr.fr/legal" className="text-sm hover:underline">Mentions Légales</Link>
+            <Link to="https://teachr.fr/cgu_cgv" className="text-sm hover:underline">CGU - CGV</Link>
+            <Link to="https://teachr.fr/policy" className="text-sm hover:underline">Politique de Confidentialité</Link>
+          </div>
+
+          <div className="flex justify-center sm:justify-start space-x-6">
+            <a href="https://www.facebook.com/TeachrOfficial" className="text-white hover:text-blue-600">
+              <Facebook fontSize="large" />
+            </a>
+            <a href="https://www.instagram.com/teachrofficial/?hl=fr" className="text-white hover:text-blue-600">
+              <Instagram fontSize="large" />
+            </a>
+            <a href="https://fr.linkedin.com/company/teach-r" className="text-white hover:text-blue-600">
+              <LinkedIn fontSize="large" />
+            </a>
+          </div>
         </div>
 
-        {}
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#1f87ff',
-            '&:hover': { backgroundColor: '#005bcb' },
-          }}
-        >
-          Abonnez-vous à notre newsletter
-        </Button>
+        <div className="mt-8 text-center text-sm text-gray-400">
+          <p>&copy; 2024 Teach'r. Tous droits réservés.</p>
+        </div>
       </div>
-    </Box>
+    </footer>
   );
 };
 
